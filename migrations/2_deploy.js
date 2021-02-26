@@ -1,5 +1,5 @@
 const Token = artifacts.require("Token");
-const decFinance = artifacts.require("decFinance");
+const decfinance = artifacts.require("decFinance");
 
 module.exports = async function (deployer) {
 	//deploy Token
@@ -9,11 +9,11 @@ module.exports = async function (deployer) {
 	const token = await Token.deployed()
 
 	//pass token address for decFinance contract(for future minting)
-	await deployer.deploy(decFinance, token.address)
+	await deployer.deploy(decfinance, token.address)
 
 	//assign decFinance contract into variable to get it's address
-	const decFinance = await decFinance.deployed()
+	const decFinance = await decfinance.deployed()
 
 	//change token's owner/minter from deployer to decFinance
-	await token.passMinterRole(decfinance.address)
+	await token.changeMinter(decFinance.address)
 };

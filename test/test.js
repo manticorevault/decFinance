@@ -10,13 +10,13 @@ require('chai')
 //h0m3w0rk - check values from events.
 
 contract('decFinance', ([deployer, user]) => {
-  let decfinance., token
+  let decfinance, token
   const interestPerSecond = 31668017 //(10% APY) for min. deposit (0.01 ETH)
 
   beforeEach(async () => {
     token = await Token.new()
-    decfinance. = await DecentralizedecFinance.new(token.address)
-    await token.passMinterRole(decfinance..address, { from: deployer })
+    decfinance = await DecentralizedecFinance.new(token.address)
+    await token.changeMinter(decfinance.address, { from: deployer })
   })
 
   describe('testing token contract...', () => {
@@ -34,13 +34,13 @@ contract('decFinance', ([deployer, user]) => {
       })
 
       it('decFinance should have Token minter role', async () => {
-        expect(await token.minter()).to.eq(decfinance..address)
+        expect(await token.minter()).to.eq(decfinance.address)
       })
     })
 
     describe('failure', () => {
       it('passing minter role should be rejected', async () => {
-        await token.passMinterRole(user, { from: deployer }).should.be.rejectedWith(EVM_REVERT)
+        await token.changeMinter(user, { from: deployer }).should.be.rejectedWith(EVM_REVERT)
       })
 
       it('tokens minting should be rejected', async () => {
@@ -54,25 +54,25 @@ contract('decFinance', ([deployer, user]) => {
 
     describe('success', () => {
       beforeEach(async () => {
-        await decfinance..deposit({ value: 10 ** 16, from: user }) //0.01 ETH
+        await decfinance.deposit({ value: 10 ** 16, from: user }) //0.01 ETH
       })
 
       it('balance should increase', async () => {
-        expect(Number(await decfinance..etherBalanceOf(user))).to.eq(10 ** 16)
+        expect(Number(await decfinance.etherBalanceOf(user))).to.eq(10 ** 16)
       })
 
       it('deposit time should > 0', async () => {
-        expect(Number(await decfinance..depositStart(user))).to.be.above(0)
+        expect(Number(await decfinance.depositStart(user))).to.be.above(0)
       })
 
       it('deposit status should eq true', async () => {
-        expect(await decfinance..isDeposited(user)).to.eq(true)
+        expect(await decfinance.isDeposited(user)).to.eq(true)
       })
     })
 
     describe('failure', () => {
       it('depositing should be rejected', async () => {
-        await decfinance..deposit({ value: 10 ** 15, from: user }).should.be.rejectedWith(EVM_REVERT) //to small amount
+        await decfinance.deposit({ value: 10 ** 15, from: user }).should.be.rejectedWith(EVM_REVERT) //to small amount
       })
     })
   })
@@ -83,17 +83,17 @@ contract('decFinance', ([deployer, user]) => {
     describe('success', () => {
 
       beforeEach(async () => {
-        await decfinance..deposit({ value: 10 ** 16, from: user }) //0.01 ETH
+        await decfinance.deposit({ value: 10 ** 16, from: user }) //0.01 ETH
 
         await wait(2) //accruing interest
 
         balance = await web3.eth.getBalance(user)
-        await decfinance..withdraw({ from: user })
+        await decfinance.withdraw({ from: user })
       })
 
       it('balances should decrease', async () => {
-        expect(Number(await web3.eth.getBalance(decfinance..address))).to.eq(0)
-        expect(Number(await decfinance..etherBalanceOf(user))).to.eq(0)
+        expect(Number(await web3.eth.getBalance(decfinance.address))).to.eq(0)
+        expect(Number(await decfinance.etherBalanceOf(user))).to.eq(0)
       })
 
       it('user should receive ether back', async () => {
@@ -109,17 +109,17 @@ contract('decFinance', ([deployer, user]) => {
       })
 
       it('depositer data should be reseted', async () => {
-        expect(Number(await decfinance..depositStart(user))).to.eq(0)
-        expect(Number(await decfinance..etherBalanceOf(user))).to.eq(0)
-        expect(await decfinance..isDeposited(user)).to.eq(false)
+        expect(Number(await decfinance.depositStart(user))).to.eq(0)
+        expect(Number(await decfinance.etherBalanceOf(user))).to.eq(0)
+        expect(await decfinance.isDeposited(user)).to.eq(false)
       })
     })
 
     describe('failure', () => {
       it('withdrawing should be rejected', async () => {
-        await decfinance..deposit({ value: 10 ** 16, from: user }) //0.01 ETH
+        await decfinance.deposit({ value: 10 ** 16, from: user }) //0.01 ETH
         await wait(2) //accruing interest
-        await decfinance..withdraw({ from: deployer }).should.be.rejectedWith(EVM_REVERT) //wrong user
+        await decfinance.withdraw({ from: deployer }).should.be.rejectedWith(EVM_REVERT) //wrong user
       })
     })
   })
@@ -128,7 +128,7 @@ contract('decFinance', ([deployer, user]) => {
 
     describe('success', () => {
       beforeEach(async () => {
-        await decfinance..borrow({ value: 10 ** 16, from: user }) //0.01 ETH
+        await decfinance.borrow({ value: 10 ** 16, from: user }) //0.01 ETH
       })
 
       it('token total supply should increase', async () => {
@@ -140,17 +140,17 @@ contract('decFinance', ([deployer, user]) => {
       })
 
       it('collateralEther should increase', async () => {
-        expect(Number(await decfinance..collateralEther(user))).to.eq(10 ** 16) //0.01 ETH
+        expect(Number(await decfinance.collateralEther(user))).to.eq(10 ** 16) //0.01 ETH
       })
 
       it('user isBorrowed status should eq true', async () => {
-        expect(await decfinance..isBorrowed(user)).to.eq(true)
+        expect(await decfinance.isBorrowed(user)).to.eq(true)
       })
     })
 
     describe('failure', () => {
       it('borrowing should be rejected', async () => {
-        await decfinance..borrow({ value: 10 ** 15, from: user }).should.be.rejectedWith(EVM_REVERT) //to small amount
+        await decfinance.borrow({ value: 10 ** 15, from: user }).should.be.rejectedWith(EVM_REVERT) //to small amount
       })
     })
   })
@@ -159,9 +159,9 @@ contract('decFinance', ([deployer, user]) => {
 
     describe('success', () => {
       beforeEach(async () => {
-        await decfinance..borrow({ value: 10 ** 16, from: user }) //0.01 ETH
-        await token.approve(decfinance..address, (5 * (10 ** 15)).toString(), { from: user })
-        await decfinance..payOff({ from: user })
+        await decfinance.borrow({ value: 10 ** 16, from: user }) //0.01 ETH
+        await token.approve(decfinance.address, (5 * (10 ** 15)).toString(), { from: user })
+        await decfinance.payOff({ from: user })
       })
 
       it('user token balance should eq 0', async () => {
@@ -169,20 +169,20 @@ contract('decFinance', ([deployer, user]) => {
       })
 
       it('decFinance eth balance should get fee', async () => {
-        expect(Number(await web3.eth.getBalance(decfinance..address))).to.eq(10 ** 15) //10% of 0.01 ETH
+        expect(Number(await web3.eth.getBalance(decfinance.address))).to.eq(10 ** 15) //10% of 0.01 ETH
       })
 
       it('borrower data should be reseted', async () => {
-        expect(Number(await decfinance..collateralEther(user))).to.eq(0)
-        expect(await decfinance..isBorrowed(user)).to.eq(false)
+        expect(Number(await decfinance.collateralEther(user))).to.eq(0)
+        expect(await decfinance.isBorrowed(user)).to.eq(false)
       })
     })
 
     describe('failure', () => {
       it('paying off should be rejected', async () => {
-        await decfinance..borrow({ value: 10 ** 16, from: user }) //0.01 ETH
-        await token.approve(decfinance..address, (5 * (10 ** 15)).toString(), { from: user })
-        await decfinance..payOff({ from: deployer }).should.be.rejectedWith(EVM_REVERT) //wrong user
+        await decfinance.borrow({ value: 10 ** 16, from: user }) //0.01 ETH
+        await token.approve(decfinance.address, (5 * (10 ** 15)).toString(), { from: user })
+        await decfinance.payOff({ from: deployer }).should.be.rejectedWith(EVM_REVERT) //wrong user
       })
     })
   })
