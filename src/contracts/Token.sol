@@ -13,7 +13,7 @@ contract Token is ERC20 {
   }
 
   function changeMinter(address decFinance) public returns (bool) {
-  	require(msg.sender==minter, "Oops, apparently that's an illegal operation.");
+  	require(msg.sender==minter, "Oops, apparently that's an illegal operation. Only the contract sender can change the token minter");
   	minter = decFinance;
 
     emit MinterChanged(msg.sender, decFinance);
@@ -21,7 +21,7 @@ contract Token is ERC20 {
   }
 
   function mint(address account, uint256 amount) public {
-		require(msg.sender==minter, "Oops, apparently that's an illegal operation."); 
+		require(msg.sender==minter, "Oops, apparently that's an illegal operation. Token minter must be the sender"); 
 		_mint(account, amount);
 	}
 }

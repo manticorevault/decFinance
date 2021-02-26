@@ -38,7 +38,7 @@ contract decFinance {
     require(isDeposited[msg.sender]==true, 'Error, no previous deposit');
     uint userBalance = etherBalanceOf[msg.sender]; //for event
 
-    //check user's hodl time
+    //check user's holding time
     uint depositTime = block.timestamp - depositStart[msg.sender];
 
     //31668017 - interest(10% APY) per second for min. deposit amount (0.01 ETH), cuz:
