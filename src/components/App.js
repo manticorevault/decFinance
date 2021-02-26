@@ -2,7 +2,6 @@ import { Tabs, Tab } from 'react-bootstrap'
 import decFinance from '../abis/decFinance.json'
 import React, { Component } from 'react';
 import Token from '../abis/Token.json'
-import decfinance.from '../decfinance..png';
 import Web3 from 'web3';
 import './App.css';
 
